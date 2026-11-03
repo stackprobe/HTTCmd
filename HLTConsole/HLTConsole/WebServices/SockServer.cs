@@ -1,11 +1,4 @@
-﻿// Processed by SolutionConv >>>
-//
-// 本ソースファイルは、公開時の所定の手続きとして一部のセンシティブな情報をマスキングしています。
-// 元データの機微に触れる可能性がある箇所を伏せ字化したものであり、
-// リリース版との処理内容に実質的な差異が生じない範囲で調整を加えています。
-//
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,49 +9,41 @@ using HLTStudio.Commons;
 
 namespace HLTStudio.WebServices
 {
-	// ////////////////////////////////////////////////////////////////////////////////
-	// ///// ///////////////////////// /////
-	// ////////////////////////////////////////////////////////////////////////////////
-	// ////////////////////////////////////////////////
-	// ////////////////////
-	// ///////////////////////////////////////
-	// ////////////////////////////////////////////////////////////////////////////////
-
 	public abstract class SockServer
 	{
-		/// /////////
-		/// /////
-		/// //////////
+		/// <summary>
+		/// ポート番号
+		/// </summary>
 		public int PortNo = 59999;
 
-		/// /////////
-		/// //////////
-		/// //////////
+		/// <summary>
+		/// 接続待ちキューの長さ
+		/// </summary>
 		public int Backlog = 300;
 
-		/// /////////
-		/// ///////
-		/// //////////
+		/// <summary>
+		/// 最大同時接続数
+		/// </summary>
 		public int ConnectMax = 100;
 
-		/// /////////
-		/// ////////////
-		/// ////
-		/// // //////////
-		/// //////////
+		/// <summary>
+		/// 処理の合間に呼ばれる処理
+		/// 戻り値：
+		/// -- サーバーを継続するか
+		/// </summary>
 		public Func<bool> Interlude = () => !Console.KeyAvailable;
 
-		// ///// //// // //////
+		// <---- init if needed
 
-		/// /////////
-		/// ////////
-		/// ////
-		/// // / // //// // //////////////// ////////// / ////////////// /////
-		/// // / // // ////
-		/// // / // // ////
-		/// //////////
-		/// ////// /////////////////////////////
-		/// //////////////////////
+		/// <summary>
+		/// サーバーロジック
+		/// 通信量：
+		/// -- 0 == 通信終了 -- SCommon.Supplier の最後の要素の次以降 0 (default(int)) になるため
+		/// -- 0 未満 == 通信無し
+		/// -- 1 以上 == 通信有り
+		/// </summary>
+		/// <param name="channel">接続チャネル</param>
+		/// <returns>通信量</returns>
 		protected abstract IEnumerable<int> E_Connected(SockChannel channel);
 
 		private List<SockChannel> Channels = new List<SockChannel>();
@@ -100,18 +85,18 @@ namespace HLTStudio.WebServices
 					{
 						if (waitMillis < 100)
 						{
-							//// /////////// // /// ///////////////////////////////////////////////// ////// // /////////
+							//if (waitMillis == 70) SockCommon.WriteLog(SockCommon.ErrorLevel_e.INFO, "GOING TO IDLING");
 							waitMillis++;
 						}
 
-						for (int c = 0; c < 30; c++) // ///// /////
+						for (int c = 0; c < 30; c++) // rough limit
 						{
 							Socket handler = this.Channels.Count < this.ConnectMax ? this.Connect(listener) : null;
 
-							if (handler == null) // / //// // //////////////
+							if (handler == null) // ? 接続無し || 最大同時接続数に達している。
 								break;
 
-							waitMillis = 0; // /////
+							waitMillis = 0; // reset
 
 							SockCommon.TimeWaitMonitor.I.Connected();
 
@@ -140,9 +125,9 @@ namespace HLTStudio.WebServices
 							{
 								size = channel.Connected();
 
-								if (0 < size) // / ////
+								if (0 < size) // ? 通信有り
 								{
-									waitMillis = 0; // /////
+									waitMillis = 0; // reset
 								}
 							}
 							catch (Exception ex)
@@ -155,7 +140,7 @@ namespace HLTStudio.WebServices
 								size = 0;
 							}
 
-							if (size == 0) // / //
+							if (size == 0) // ? 切断
 							{
 								SockCommon.WriteLog(SockCommon.ErrorLevel_e.INFO, "通信終了 " + channel.ID);
 
@@ -170,7 +155,7 @@ namespace HLTStudio.WebServices
 							}
 						}
 
-						SockCommon.ShuffleP4(this.Channels); // /////////////////
+						SockCommon.ShuffleP4(this.Channels); // 適当に順序を入れ替えるおまじない。
 
 						GC.Collect();
 
@@ -191,7 +176,7 @@ namespace HLTStudio.WebServices
 			SockCommon.WriteLog(SockCommon.ErrorLevel_e.INFO, "サーバーを終了しました。");
 		}
 
-		private Socket Connect(Socket listener) // //// //// // ////////
+		private Socket Connect(Socket listener) // ret: null == 接続タイムアウト
 		{
 			try
 			{
@@ -241,7 +226,3 @@ namespace HLTStudio.WebServices
 		}
 	}
 }
-
-//
-// <<< Processed by SolutionConv
-//

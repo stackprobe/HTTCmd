@@ -1,44 +1,29 @@
-﻿// Processed by SolutionConv >>>
-//
-// 本ソースファイルは、公開時の所定の手続きとして一部のセンシティブな情報をマスキングしています。
-// 元データの機微に触れる可能性がある箇所を伏せ字化したものであり、
-// リリース版との処理内容に実質的な差異が生じない範囲で調整を加えています。
-//
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace HLTStudio.WebServices
 {
-	// ////////////////////////////////////////////////////////////////////////////////
-	// ///// ///////////////////////// /////
-	// ////////////////////////////////////////////////////////////////////////////////
-	// ////////////////////////////////////////////////
-	// ////////////////////
-	// ///////////////////////////////////////
-	// ////////////////////////////////////////////////////////////////////////////////
-
-	// ////////////
-	// // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// このクラスの使い方メモ：
+	// -- https://github.com/stackprobe/notehub/blob/main/DevSourceRef/UsageExample_HTTPServer.md
 
 	public class HTTPServer : SockServer
 	{
-		/// /////////
-		/// ////////
-		/// ///
-		/// // //////// //////
-		/// //////////
+		/// <summary>
+		/// サーバーロジック
+		/// 引数：
+		/// -- channel: 接続チャネル
+		/// </summary>
 		public Action<HTTPServerChannel> HTTPConnected = channel => { };
 
-		/// /////////
-		/// //////////////////
-		/// // // ////////
-		/// //////////
+		/// <summary>
+		/// キープアライブのタイムアウト_ミリ秒
+		/// -1 == INFINITE
+		/// </summary>
 		public static int KeepAliveTimeoutMillis = 5000;
 
-		// ///// //// // //////
+		// <---- init if needed
 
 		public HTTPServer()
 		{
@@ -59,7 +44,7 @@ namespace HLTStudio.WebServices
 				foreach (int size in hsChannel.RecvRequest())
 				{
 					if (size == 0)
-						throw null; // /////
+						throw null; // never
 
 					if (size < 0)
 					{
@@ -75,7 +60,7 @@ namespace HLTStudio.WebServices
 				SockCommon.NB("svlg", () =>
 				{
 					HTTPConnected(hsChannel);
-					return -1; // /////
+					return -1; // dummy
 				});
 
 				if (KeepAliveTimeoutMillis != -1 && KeepAliveTimeoutMillis < (DateTime.Now - startedTime).TotalMilliseconds)
@@ -86,7 +71,7 @@ namespace HLTStudio.WebServices
 				foreach (int size in hsChannel.SendResponse())
 				{
 					if (size == 0)
-						throw null; // /////
+						throw null; // never
 
 					if (size < 0)
 					{
@@ -105,7 +90,3 @@ namespace HLTStudio.WebServices
 		}
 	}
 }
-
-//
-// <<< Processed by SolutionConv
-//

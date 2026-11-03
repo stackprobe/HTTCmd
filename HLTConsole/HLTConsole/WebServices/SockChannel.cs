@@ -1,11 +1,4 @@
-﻿// Processed by SolutionConv >>>
-//
-// 本ソースファイルは、公開時の所定の手続きとして一部のセンシティブな情報をマスキングしています。
-// 元データの機微に触れる可能性がある箇所を伏せ字化したものであり、
-// リリース版との処理内容に実質的な差異が生じない範囲で調整を加えています。
-//
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,14 +8,6 @@ using HLTStudio.Commons;
 
 namespace HLTStudio.WebServices
 {
-	// ////////////////////////////////////////////////////////////////////////////////
-	// ///// ///////////////////////// /////
-	// ////////////////////////////////////////////////////////////////////////////////
-	// ////////////////////////////////////////////////
-	// ////////////////////
-	// ///////////////////////////////////////
-	// ////////////////////////////////////////////////////////////////////////////////
-
 	public class SockChannel
 	{
 		public Socket Handler;
@@ -31,34 +16,34 @@ namespace HLTStudio.WebServices
 		public HTTPBodyOutputStream.IBOS BodyOutputStream;
 		public SockServer Parent;
 
-		// ///// //// ////
+		// <---- need init
 
-		/// /////////
-		/// ////////////////
-		/// // // ////////
-		/// //////////
+		/// <summary>
+		/// スレッド占用タイムアウト_ミリ秒
+		/// -1 == INFINITE
+		/// </summary>
 		public static int ThreadTimeoutMillis = 100;
 
-		// ///// //// // //////
+		// <---- init if needed
 
 		public bool FirstLineRecving = false;
 
-		/// /////////
-		/// /////////////
-		/// //// // ////////
-		/// //////////
+		/// <summary>
+		/// セッションタイムアウト日時
+		/// null == INFINITE
+		/// </summary>
 		public DateTime? SessionTimeoutTime = null;
 
-		/// /////////
-		/// //////////////
-		/// //// // //////
-		/// //////////
+		/// <summary>
+		/// スレッド占用タイムアウト日時
+		/// null == リセット状態
+		/// </summary>
 		public DateTime? ThreadTimeoutTime = null;
 
-		/// /////////
-		/// /////////////
-		/// // // ////////
-		/// //////////
+		/// <summary>
+		/// 無通信タイムアウト_ミリ秒
+		/// -1 == INFINITE
+		/// </summary>
 		public int CurrIdleTimeoutMillis = -1;
 
 		private IEnumerable<int> PreRecvSend()
@@ -74,7 +59,7 @@ namespace HLTStudio.WebServices
 			}
 			else if (this.ThreadTimeoutTime.Value < DateTime.Now)
 			{
-				/////////////////////////////////////////////////// //////////////// // ////////
+				//SockCommon.WriteLog(SockCommon.ErrorLevel_e.INFO, "スレッド占用タイムアウト"); // 頻出するので抑止
 
 				this.ThreadTimeoutTime = null;
 				yield return -1;
@@ -116,7 +101,7 @@ namespace HLTStudio.WebServices
 					{
 						throw new Exception("受信切断");
 					}
-					if (10.0 <= (DateTime.Now - startedTime).TotalSeconds) // //////////////
+					if (10.0 <= (DateTime.Now - startedTime).TotalSeconds) // 長い無通信時間をモニタする。
 					{
 						SockCommon.WriteLog(SockCommon.ErrorLevel_e.WARNING, $"IDLE-RECV {(DateTime.Now - startedTime).TotalSeconds:F3}");
 					}
@@ -140,9 +125,9 @@ namespace HLTStudio.WebServices
 			yield return 1;
 		}
 
-		/// /////////
-		/// ////////////
-		/// //////////
+		/// <summary>
+		/// 受信の無通信タイムアウト
+		/// </summary>
 		public class RecvIdleTimeoutException : Exception
 		{ }
 
@@ -153,12 +138,12 @@ namespace HLTStudio.WebServices
 
 			while (1 <= size)
 			{
-				///// /////// / /////////////////////////
-				///////// / /////////// ///////// // ///
+				//int vsDenom = this.Parent.ChannelCount;
+				//vsDenom = Math.Max(1, vsDenom); // 2bs
 
 				int vSize = 4000000;
-				/////// // ////////
-				/////// / /////////////// ////// // ///
+				//vSize /= vsDenom;
+				//vSize = Math.Max(vSize, 1000); // 2bs
 				vSize = Math.Min(vSize, size);
 
 				int? sentSize = null;
@@ -188,7 +173,7 @@ namespace HLTStudio.WebServices
 					{
 						throw new Exception("送信切断");
 					}
-					if (10.0 <= (DateTime.Now - startedTime).TotalSeconds) // //////////////
+					if (10.0 <= (DateTime.Now - startedTime).TotalSeconds) // 長い無通信時間をモニタする。
 					{
 						SockCommon.WriteLog(SockCommon.ErrorLevel_e.WARNING, $"IDLE-SEND {(DateTime.Now - startedTime).TotalSeconds:F3}");
 					}
@@ -213,7 +198,3 @@ namespace HLTStudio.WebServices
 		}
 	}
 }
-
-//
-// <<< Processed by SolutionConv
-//

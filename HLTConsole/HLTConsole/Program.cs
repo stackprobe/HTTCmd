@@ -1,11 +1,4 @@
-﻿// Processed by SolutionConv >>>
-//
-// 本ソースファイルは、公開時の所定の手続きとして一部のセンシティブな情報をマスキングしています。
-// 元データの機微に触れる可能性がある箇所を伏せ字化したものであり、
-// リリース版との処理内容に実質的な差異が生じない範囲で調整を加えています。
-//
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -40,22 +33,22 @@ namespace HLTStudio
 		private void Main3()
 		{
 #if DEBUG
-			// // ////// /// //
+			// -- choose one --
 
-			/////////// ////////////// //////// / ////
-			/////////// ////////////// //////// / ////////////////////////////////// ////
-			/////////// ////////////// //////// / /////////////////////////////////// //// ////
-			///////// ////////////// //////// / /////////////////////////////////// ///// //// ////
-			/////////// ////////////// //////// / /////////////////////////////////// ///// ///// //////////////// ////
-			/////////// ////////////// //////// / /////////////////////////////////// ///// ///// ///////////////// //// ////
-			/////////// ////////////// //////// / /////////////////////////////////// ///// ///// ///// //////////////// ////
-			/////////// ////////////// //////// / /////////////////////////////////// ///// ///// ///// //////////////// ////
-			/////////// ////////////// //////// / /////////////////////////////////// ///// ///// ///// ///////////////// ///// //////////////// ////
-			/////////// ////////////// //////// / /////////////////////////////////// ///// ///// ///// //////////////// ////
-			/////////// ////////////// //////// / /////////////////////////////////// /////// ///// ///// ///////////////// ///// //////////////// ////
-			/////////// ////////////// //////// / /////////////////////////////////// ///// ///// ///// ///////////////// ////
+			//Main4(new ArgsReader(new string[] { }));
+			//Main4(new ArgsReader(new string[] { @"C:\home\TestData\HTTCmd\DocRoot" }));
+			//Main4(new ArgsReader(new string[] { @"C:\home\TestData\HTTCmd\DocRoot", "80" }));
+			Main4(new ArgsReader(new string[] { @"C:\home\TestData\HTTCmd\DocRoot", "80", "/K" }));
+			//Main4(new ArgsReader(new string[] { @"C:\home\TestData\HTTCmd\DocRoot", "80", "/T", @"C:\temp\1.tsv" }));
+			//Main4(new ArgsReader(new string[] { @"C:\home\TestData\HTTCmd\DocRoot", "80", "/T", @"C:\temp\1.tsv", "/K" }));
+			//Main4(new ArgsReader(new string[] { @"C:\home\TestData\HTTCmd\DocRoot", "80", "/K", "/T", @"C:\temp\1.tsv" }));
+			//Main4(new ArgsReader(new string[] { @"C:\home\TestData\HTTCmd\DocRoot", "80", "/K", "/T", @"C:\temp\1.tsv" }));
+			//Main4(new ArgsReader(new string[] { @"C:\home\TestData\HTTCmd\DocRoot", "80", "/K", "/T", @"C:\temp\1.tsv", "/H", @"C:\temp\2.tsv" }));
+			//Main4(new ArgsReader(new string[] { @"C:\home\TestData\HTTCmd\DocRoot", "80", "/K", "/H", @"C:\temp\2.tsv" }));
+			//Main4(new ArgsReader(new string[] { @"C:\home\TestData\HTTCmd\DocRoot", "8080", "/K", "/T", @"C:\temp\1.tsv", "/H", @"C:\temp\2.tsv" }));
+			//Main4(new ArgsReader(new string[] { @"C:\home\TestData\HTTCmd\DocRoot", "80", "/K", "/N", @"C:\temp\1.html" }));
 
-			// //
+			// --
 #endif
 			SCommon.Pause();
 		}
@@ -74,14 +67,14 @@ namespace HLTStudio
 
 		private void Main5(ArgsReader ar)
 		{
-			// /////////////////////////////////////////
+			// 複数のサーバーを起動していた場合、全て停止できるようにマニュアル・リセットとする。
 			using (EventWaitHandle evStop = new EventWaitHandle(false, EventResetMode.ManualReset, Consts.SERVER_STOP_EVENT_NAME))
 			{
 				HTTPServer hs = new HTTPServer()
 				{
 					PortNo = 80,
-					Backlog = 300,
-					ConnectMax = 100,
+					Backlog = 100,
+					ConnectMax = 30,
 					Interlude = () => !evStop.WaitOne(0),
 					HTTPConnected = P_Connected,
 				};
@@ -90,10 +83,10 @@ namespace HLTStudio
 
 				HTTPServer.KeepAliveTimeoutMillis = 5000;
 
-				HTTPServerChannel.RequestTimeoutMillis = 10000; // // ///
+				HTTPServerChannel.RequestTimeoutMillis = 10000; // 10 sec
 				HTTPServerChannel.ResponseTimeoutMillis = -1;
 				HTTPServerChannel.FirstLineTimeoutMillis = 2000;
-				HTTPServerChannel.IdleTimeoutMillis = 600000; // // ///
+				HTTPServerChannel.IdleTimeoutMillis = 600000; // 10 min
 				HTTPServerChannel.BodySizeMax = 0;
 				HTTPServerChannel.BodyOnStorage = false;
 
@@ -101,7 +94,7 @@ namespace HLTStudio
 				SockCommon.TimeWaitMonitor.COUNTER_NUM = 5;
 				SockCommon.TimeWaitMonitor.COUNT_LIMIT = 10000;
 
-				// ////
+				// ----
 
 				if (ar.ArgIs("/S"))
 				{
@@ -122,7 +115,7 @@ namespace HLTStudio
 						if (hs.PortNo < 1 || 65535 < hs.PortNo)
 							throw new Exception("不正なポート番号");
 
-						for (; ; ) // ///////
+						for (; ; ) // 拡張オプション
 						{
 							if (ar.ArgIs("/K"))
 							{
@@ -217,7 +210,7 @@ namespace HLTStudio
 		{
 			SockCommon.WriteLog(SockCommon.ErrorLevel_e.INFO, "CLIENT " + channel.Channel.Handler.RemoteEndPoint);
 
-			if (10 < channel.Method.Length) // ///// /////
+			if (10 < channel.Method.Length) // rough limit
 				throw new Exception("Received method is too long");
 
 			SockCommon.WriteLog(SockCommon.ErrorLevel_e.INFO, "METHOD " + channel.Method);
@@ -242,7 +235,7 @@ namespace HLTStudio
 			{
 				string hostName = host;
 
-				// ///////
+				// ポート番号除去
 				{
 					int colon = hostName.IndexOf(':');
 
@@ -256,7 +249,7 @@ namespace HLTStudio
 
 			string urlPath = channel.PathQuery;
 
-			// /////
+			// クエリ除去
 			{
 				int ques = urlPath.IndexOf('?');
 
@@ -264,7 +257,7 @@ namespace HLTStudio
 					urlPath = urlPath.Substring(0, ques);
 			}
 
-			if (1000 < urlPath.Length) // ///// /////
+			if (1000 < urlPath.Length) // rough limit
 				throw new Exception("Received path is too long");
 
 			SockCommon.WriteLog(SockCommon.ErrorLevel_e.INFO, "URL-PT " + urlPath);
@@ -273,7 +266,7 @@ namespace HLTStudio
 			string path;
 			if (urlPath == "/")
 			{
-				relPath = "_ROOT"; // ///////////
+				relPath = "_ROOT"; // ダミーで何か入れておく
 				path = docRoot;
 			}
 			else
@@ -326,7 +319,7 @@ namespace HLTStudio
 			else
 			{
 				channel.ResStatus = 404;
-				///////////////////////////////
+				//channel.ResHeaderPairs.Add();
 				channel.ResBody = null;
 				channel.ResBodyLength = -1L;
 
@@ -380,7 +373,7 @@ namespace HLTStudio
 				int readSize = (int)Math.Min(fileSize - offset, (long)(512 * 1024));
 				byte[] buff = new byte[readSize];
 
-				/////////////////////////////////////////////////// ///// / / ////// / / / / //////// / / / / //////// / / / / /////// / ///// / //////////////////////// / / / / //////// / ///////// / ///// / ////////////////////////// // ////////
+				//SockCommon.WriteLog(SockCommon.ErrorLevel_e.INFO, "READ " + offset + " " + readSize + " " + fileSize + " " + (offset * 100.0 / fileSize).ToString("F2") + " " + ((offset + readSize) * 100.0 / fileSize).ToString("F2")); // 頻出するので抑止
 
 				using (FileStream reader = new FileStream(file, FileMode.Open, FileAccess.Read))
 				{
@@ -394,7 +387,3 @@ namespace HLTStudio
 		}
 	}
 }
-
-//
-// <<< Processed by SolutionConv
-//

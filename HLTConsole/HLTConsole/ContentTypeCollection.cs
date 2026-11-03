@@ -1,11 +1,4 @@
-﻿// Processed by SolutionConv >>>
-//
-// 本ソースファイルは、公開時の所定の手続きとして一部のセンシティブな情報をマスキングしています。
-// 元データの機微に触れる可能性がある箇所を伏せ字化したものであり、
-// リリース版との処理内容に実質的な差異が生じない範囲で調整を加えています。
-//
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,11 +24,11 @@ namespace HLTStudio
 			}
 		}
 
-		#region /////////////////////////////
+		#region Extension2ContentTypeResource
 
-		/// /////////
-		/// //// //// //////////// ////
-		/// //////////
+		/// <summary>
+		/// 拡張子と MIME Content-Type の対応表
+		/// </summary>
 		private static string[] Extension2ContentTypeResource = new string[]
 		{
 			".323", "text/h323",
@@ -277,11 +270,7 @@ namespace HLTStudio
 			if (this.Extension2ContentType.ContainsKey(ext))
 				return this.Extension2ContentType[ext];
 
-			return "application/octet-stream"; // /////
+			return "application/octet-stream"; // デフォルト
 		}
 	}
 }
-
-//
-// <<< Processed by SolutionConv
-//

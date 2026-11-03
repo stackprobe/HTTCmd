@@ -1,11 +1,4 @@
-﻿// Processed by SolutionConv >>>
-//
-// 本ソースファイルは、公開時の所定の手続きとして一部のセンシティブな情報をマスキングしています。
-// 元データの機微に触れる可能性がある箇所を伏せ字化したものであり、
-// リリース版との処理内容に実質的な差異が生じない範囲で調整を加えています。
-//
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,14 +7,6 @@ using HLTStudio.Commons;
 
 namespace HLTStudio.WebServices
 {
-	// ////////////////////////////////////////////////////////////////////////////////
-	// ///// ///////////////////////// /////
-	// ////////////////////////////////////////////////////////////////////////////////
-	// ////////////////////////////////////////////////
-	// ////////////////////
-	// ///////////////////////////////////////
-	// ////////////////////////////////////////////////////////////////////////////////
-
 	public static class SockCommon
 	{
 		public const int WSAEWOULDBLOCK = 10035;
@@ -68,7 +53,7 @@ namespace HLTStudio.WebServices
 					break;
 
 				default:
-					throw null; // /////
+					throw null; // never
 			}
 		}
 
@@ -101,20 +86,20 @@ namespace HLTStudio.WebServices
 
 			public UTF8Check()
 			{
-				for (byte chr = 0x20; chr <= 0x7e; chr++) // /////
+				for (byte chr = 0x20; chr <= 0x7e; chr++) // ASCII
 					this.Add(new byte[] { chr });
 
-				for (byte chr = 0xa1; chr <= 0xdf; chr++) // ////
+				for (byte chr = 0xa1; chr <= 0xdf; chr++) // 半角カナ
 					this.Add(Encoding.UTF8.GetBytes(SCommon.ENCODING_SJIS.GetString(new byte[] { chr })));
 
-				foreach (char chr in SCommon.GetJChars()) // //////
+				foreach (char chr in SCommon.GetJChars()) // 2バイト文字
 					this.Add(Encoding.UTF8.GetBytes(new string(new char[] { chr })));
 			}
 
 			private void Add(byte[] bytes)
 			{
 				if (bytes.Length < 1)
-					throw null; // /////
+					throw null; // never
 
 				object[] curr = this.Home;
 
@@ -128,15 +113,15 @@ namespace HLTStudio.WebServices
 					curr = (object[])curr[index];
 
 					if (curr == this.Home)
-						throw null; // /////
+						throw null; // never
 				}
 
 				{
 					int index = (int)bytes[bytes.Length - 1];
 
 					if (curr[index] != null)
-						if (curr[index] != this.Home) // ////////////////
-							throw null; // /////
+						if (curr[index] != this.Home) // 同じ文字が追加されることがある。
+							throw null; // never
 
 					curr[index] = this.Home;
 				}
@@ -185,22 +170,22 @@ namespace HLTStudio.WebServices
 
 		public class TimeWaitMonitor
 		{
-			// ////
-			// /////// ///// ////// / /////// //////////////// / /// //// //// /// /////////////
-			// /////////// / //
-			// /////////// / /       // // / / / //////////
-			// /////////// / /////   // // ///////////////// / /// //// / /// ///////// / ///// //////////// / ///// //////
-			// / / /
-			// /////// ///// ///// / /////// //////////////// / /// /// //// /// /////////
-			// /////////// / //
-			// /////////// / /       // // / / /// //////////
-			// /////////// / /////   // // ///////////////// / /// //// / /// ///////// / ///// //////////// / ///// //////
+			// 参考値：
+			// 動的ポートの数 16384 (49152 ～ 65535), TIME_WAIT-タイムアウト 4 min (240 sec) の場合 (Windowsの既定値)
+			// CTR_ROT_SEC = 60
+			// COUNTER_NUM = 5       -- 直近 4 ～ 5 分間の切断回数を保持
+			// COUNT_LIMIT = 10000   -- 50 ミリ秒間隔で接続＆切断し続けた場合 4 分間に 4800 回 --> TIME_WAIT 数 14800 (COUNT_LIMIT + 4800) を超えない。
+			// - - -
+			// 動的ポートの数 64511 (1025 ～ 65535), TIME_WAIT-タイムアウト 1 min (60 sec) の場合 (動的ポート最大)
+			// CTR_ROT_SEC = 30
+			// COUNTER_NUM = 3       -- 直近 1 ～ 1.5 分間の切断回数を保持
+			// COUNT_LIMIT = 60000   -- 50 ミリ秒間隔で接続＆切断し続けた場合 1 分間に 1200 回 --> TIME_WAIT 数 61200 (COUNT_LIMIT + 1200) を超えない。
 
 			public static int CTR_ROT_SEC = 60;
 			public static int COUNTER_NUM = 5;
 			public static int COUNT_LIMIT = 10000;
 
-			// ///// //// // //////
+			// <---- init if needed
 
 			private static TimeWaitMonitor _i = null;
 
@@ -216,7 +201,7 @@ namespace HLTStudio.WebServices
 			}
 
 			private int ConnectedCount = 0;
-			private int[] TWCounters = new int[COUNTER_NUM]; // //////////////////////////
+			private int[] TWCounters = new int[COUNTER_NUM]; // 直近数分間に発生した切断(TIME_WAIT)の回数
 			private int TWCounterIndex = 0;
 			private DateTime NextRotateTime = GetNextRotateTime();
 
@@ -224,11 +209,11 @@ namespace HLTStudio.WebServices
 			{
 				this.KickCounter(1, 0);
 
-				if (COUNT_LIMIT < this.ConnectedCount + this.TWCounters.Sum()) // / ///////// /// // ///////////////// ///////// /////
+				if (COUNT_LIMIT < this.ConnectedCount + this.TWCounters.Sum()) // ? TIME_WAIT 多すぎ -> 時間当たりの接続数を制限する。-- TIME_WAIT を減らす。
 				{
 					SockCommon.WriteLog(SockCommon.ErrorLevel_e.WARNING, "PORT-EXHAUSTION");
 
-					Thread.Sleep(50); // ///// ////////
+					Thread.Sleep(50); // HACK: 送受信も止める。
 				}
 			}
 
@@ -278,7 +263,3 @@ namespace HLTStudio.WebServices
 		}
 	}
 }
-
-//
-// <<< Processed by SolutionConv
-//

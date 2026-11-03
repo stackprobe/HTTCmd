@@ -1,11 +1,4 @@
-﻿// Processed by SolutionConv >>>
-//
-// 本ソースファイルは、公開時の所定の手続きとして一部のセンシティブな情報をマスキングしています。
-// 元データの機微に触れる可能性がある箇所を伏せ字化したものであり、
-// リリース版との処理内容に実質的な差異が生じない範囲で調整を加えています。
-//
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,14 +8,6 @@ using HLTStudio.Tools;
 
 namespace HLTStudio.WebServices
 {
-	// ////////////////////////////////////////////////////////////////////////////////
-	// ///// ///////////////////////// /////
-	// ////////////////////////////////////////////////////////////////////////////////
-	// ////////////////////////////////////////////////
-	// ////////////////////
-	// ///////////////////////////////////////
-	// ////////////////////////////////////////////////////////////////////////////////
-
 	public static class HTTPBodyOutputStream
 	{
 		public static IBOS Create(bool fileMode)
@@ -35,34 +20,34 @@ namespace HLTStudio.WebServices
 
 		public interface IBOS : IDisposable
 		{
-			/// /////////
-			/// //////////
-			/// //////////
-			/// ////// ////////////////////////////
+			/// <summary>
+			/// バイト列を書き込む。
+			/// </summary>
+			/// <param name="data">書き込むバイト列</param>
 			void Write(byte[] data);
 
-			/// /////////
-			/// //////////////
-			/// //////////
-			/// /////////////////////////////
+			/// <summary>
+			/// 書き込んだ総バイト数を返す。
+			/// </summary>
+			/// <returns>書き込んだ総バイト数</returns>
 			long GetWroteSize();
 
-			/// /////////
-			/// ////////////////////
-			/// //////////
-			/// ////////////////////////////
+			/// <summary>
+			/// 書き込んだバイト列を返し、リセットする。
+			/// </summary>
+			/// <returns>書き込んだバイト列</returns>
 			byte[] ToByteArray();
 
-			/// /////////
-			/// //////////////////////////
-			/// //////////
-			/// ////// //////////////////////////////
+			/// <summary>
+			/// 書き込んだバイト列をファイルに出力し、リセットする。
+			/// </summary>
+			/// <param name="destFile">出力ファイル</param>
 			void ToFile(string destFile);
 
-			/// /////////
-			/// /////////////////////
-			/// //////////
-			/// ////// ////////////////////////////
+			/// <summary>
+			/// 書き込んだバイト列を取得し、リセットする。
+			/// </summary>
+			/// <param name="writer">取得メソッド</param>
 			void ReadToEnd(SCommon.Write_d writer);
 		}
 
@@ -98,6 +83,9 @@ namespace HLTStudio.WebServices
 
 			public byte[] ToByteArray()
 			{
+				if (this.WroteSize == 0L)
+					return SCommon.EMPTY_BYTES;
+
 				byte[] data = File.ReadAllBytes(this.BufferFile);
 				SCommon.DeletePath(this.BufferFile);
 				this.WroteSize = 0L;
@@ -111,6 +99,11 @@ namespace HLTStudio.WebServices
 
 			public void ToFile(string destFile)
 			{
+				if (this.WroteSize == 0L)
+				{
+					File.WriteAllBytes(destFile, SCommon.EMPTY_BYTES);
+					return;
+				}
 				this.CtrCipher.Reset();
 
 				using (FileStream reader = new FileStream(this.BufferFile, FileMode.Open, FileAccess.Read))
@@ -131,6 +124,9 @@ namespace HLTStudio.WebServices
 
 			public void ReadToEnd(SCommon.Write_d writer)
 			{
+				if (this.WroteSize == 0L)
+					return;
+
 				this.CtrCipher.Reset();
 
 				using (FileStream reader = new FileStream(this.BufferFile, FileMode.Open, FileAccess.Read))
@@ -203,7 +199,3 @@ namespace HLTStudio.WebServices
 		}
 	}
 }
-
-//
-// <<< Processed by SolutionConv
-//

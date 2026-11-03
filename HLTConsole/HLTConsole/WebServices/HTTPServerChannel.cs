@@ -1,11 +1,4 @@
-﻿// Processed by SolutionConv >>>
-//
-// 本ソースファイルは、公開時の所定の手続きとして一部のセンシティブな情報をマスキングしています。
-// 元データの機微に触れる可能性がある箇所を伏せ字化したものであり、
-// リリース版との処理内容に実質的な差異が生じない範囲で調整を加えています。
-//
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,54 +7,46 @@ using HLTStudio.Commons;
 
 namespace HLTStudio.WebServices
 {
-	// ////////////////////////////////////////////////////////////////////////////////
-	// ///// ///////////////////////// /////
-	// ////////////////////////////////////////////////////////////////////////////////
-	// ////////////////////////////////////////////////
-	// ////////////////////
-	// ///////////////////////////////////////
-	// ////////////////////////////////////////////////////////////////////////////////
-
 	public class HTTPServerChannel
 	{
-		/// /////////
-		/// ////////////
-		/// // // ////////
-		/// //////////
+		/// <summary>
+		/// 要求タイムアウト_ミリ秒
+		/// -1 == INFINITE
+		/// </summary>
 		public static int RequestTimeoutMillis = -1;
 
-		/// /////////
-		/// ////////////
-		/// // // ////////
-		/// //////////
+		/// <summary>
+		/// 応答タイムアウト_ミリ秒
+		/// -1 == INFINITE
+		/// </summary>
 		public static int ResponseTimeoutMillis = -1;
 
-		// ///// ///////////// ///////////////// //////
+		// memo: チャンク毎のタイムアウトは IdleTimeoutMillis で代替する。
 
-		/// /////////
-		/// //////////////////////////
-		/// // // ////////
-		/// //////////
+		/// <summary>
+		/// リクエストの最初の行のみの無通信タイムアウト_ミリ秒
+		/// -1 == INFINITE
+		/// </summary>
 		public static int FirstLineTimeoutMillis = 2000;
 
-		/// /////////
-		/// ////////////////////////////////////
-		/// // // ////////
-		/// //////////
-		public static int IdleTimeoutMillis = 180000; // / ///
+		/// <summary>
+		/// リクエストの最初の行以外の(レスポンスも含む)無通信タイムアウト_ミリ秒
+		/// -1 == INFINITE
+		/// </summary>
+		public static int IdleTimeoutMillis = 180000; // 3 min
 
-		/// /////////
-		/// ////////////////////
-		/// // // ////////
-		/// //////////
-		public static long BodySizeMax = 512000000; // /// //
+		/// <summary>
+		/// リクエストのボディの最大サイズ_バイト数
+		/// -1 == INFINITE
+		/// </summary>
+		public static long BodySizeMax = 512000000; // 512 MB
 
-		/// /////////
-		/// ///////////////////////////
-		/// //////////
+		/// <summary>
+		/// リクエストのボディをストレージ上でバッファリングする。
+		/// </summary>
 		public static bool BodyOnStorage = false;
 
-		// ///// //// // //////
+		// <---- init if needed
 
 		public SockChannel Channel;
 
@@ -118,14 +103,14 @@ namespace HLTStudio.WebServices
 			{
 				for (int index = 0; index < src.Length; index++)
 				{
-					if (src[index] == 0x25 && index + 2 <= src.Length) // / ///
+					if (src[index] == 0x25 && index + 2 <= src.Length) // ? '%'
 					{
 						writer.WriteByte((byte)Convert.ToInt32(Encoding.ASCII.GetString(P_GetBytesRange(src, index + 1, 2)), 16));
 						index += 2;
 					}
-					else if (src[index] == 0x2b) // / ///
+					else if (src[index] == 0x2b) // ? '+'
 					{
-						writer.WriteByte(0x20); // / /
+						writer.WriteByte(0x20); // ' '
 					}
 					else
 					{
@@ -187,7 +172,7 @@ namespace HLTStudio.WebServices
 					if (LINE_LEN_MAX <= wroteSize)
 						throw new OverflowException("Received line is too long");
 
-					if (chr < 0x20 || 0x7e < chr) // / /// ///// // /////
+					if (chr < 0x20 || 0x7e < chr) // ? not ASCII -> SPACE
 						chr = 0x20;
 
 					writer.WriteByte(chr);
@@ -212,7 +197,7 @@ namespace HLTStudio.WebServices
 					yield return relay;
 
 				if (line == null)
-					throw null; // /////
+					throw null; // never
 
 				if (line == "")
 					break;
@@ -222,7 +207,7 @@ namespace HLTStudio.WebServices
 				if (HEADER_LEN_MAX < roughHeaderLength)
 					throw new OverflowException("Received header is too long");
 
-				if (line[0] <= ' ') // ///// ////////// ////////// // ///////////////////////////
+				if (line[0] <= ' ') // HACK: 行折り畳み(line folding)対応 -- 行折り畳みは廃止されたっぽいけど念のため対応しておく。
 				{
 					this.HeaderPairs[this.HeaderPairs.Count - 1][1] += " " + line.Trim();
 				}
@@ -255,7 +240,7 @@ namespace HLTStudio.WebServices
 				string key = pair[0];
 				string value = pair[1];
 
-				if (1000 < key.Length || 1000 < value.Length) // ///// /////
+				if (1000 < key.Length || 1000 < value.Length) // rough limit
 				{
 					SockCommon.WriteLog(SockCommon.ErrorLevel_e.INFO, "Ignore gen-header key and value (too long)");
 					continue;
@@ -303,9 +288,9 @@ namespace HLTStudio.WebServices
 						yield return relay;
 
 					if (line == null)
-						throw null; // /////
+						throw null; // never
 
-					// /////////////// ///
+					// chunk-extension の削除
 					{
 						int i = line.IndexOf(';');
 
@@ -339,15 +324,15 @@ namespace HLTStudio.WebServices
 							yield return relay;
 
 						if (data == null)
-							throw null; // /////
+							throw null; // never
 
 						buff.Write(data);
 					}
-					foreach (var relay in this.Channel.Recv(2, ret => { })) // /////
+					foreach (var relay in this.Channel.Recv(2, ret => { })) // CR-LF
 						yield return relay;
 				}
 
-				for (; ; ) // /// //// ///// /////// /////// ////
+				for (; ; ) // RFC 7230 4.1.2 Chunked Trailer Part
 				{
 					string line = null;
 
@@ -355,7 +340,7 @@ namespace HLTStudio.WebServices
 						yield return relay;
 
 					if (line == null)
-						throw null; // /////
+						throw null; // never
 
 					if (line == "")
 						break;
@@ -377,7 +362,7 @@ namespace HLTStudio.WebServices
 						yield return relay;
 
 					if (data == null)
-						throw null; // /////
+						throw null; // never
 
 					buff.Write(data);
 				}
@@ -385,21 +370,21 @@ namespace HLTStudio.WebServices
 			this.Body = buff;
 		}
 
-		// ///////////// ////////////////////////// ///
+		// HTTPConnected 内で(必要に応じて)設定しなければならないフィールド -->
 
 		public int ResStatus = 200;
 		public List<string[]> ResHeaderPairs = new List<string[]>();
-		public IEnumerable<byte[]> ResBody = null; // //////////////////// // /////////////////////////////
-		public long ResBodyLength = -1L; // //////////////////// // //////////
+		public IEnumerable<byte[]> ResBody = null; // ゼロバイトの要素を含んでも良い。null == 応答ボディ無し(ゼロバイトの応答ボディではないことに注意)
+		public long ResBodyLength = -1L; // 応答ボディの長さをセットすること。-1L == チャンクで応答する。
 
-		// /// ///////////// //////////////////////////
+		// <-- HTTPConnected 内で(必要に応じて)設定しなければならないフィールド
 
 		public IEnumerable<int> SendResponse()
 		{
 			this.Body = null;
 			this.Channel.SessionTimeoutTime = TimeoutMillisToDateTime(ResponseTimeoutMillis);
 
-			foreach (var relay in this.SendLine($"HTTP/1.1 {this.ResStatus} COFFEE READY"))
+			foreach (var relay in this.SendLine($"HTTP/1.1 {this.ResStatus} BUENA VISTA"))
 				yield return relay;
 
 			foreach (string[] pair in this.ResHeaderPairs)
@@ -500,7 +485,3 @@ namespace HLTStudio.WebServices
 		}
 	}
 }
-
-//
-// <<< Processed by SolutionConv
-//

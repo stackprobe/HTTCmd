@@ -1,11 +1,4 @@
-﻿// Processed by SolutionConv >>>
-//
-// 本ソースファイルは、公開時の所定の手続きとして一部のセンシティブな情報をマスキングしています。
-// 元データの機微に触れる可能性がある箇所を伏せ字化したものであり、
-// リリース版との処理内容に実質的な差異が生じない範囲で調整を加えています。
-//
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,15 +9,19 @@ namespace HLTStudio.Tools
 {
 	public class CsvFileReader : IDisposable
 	{
-		public const char DELIMITER_COMMA = ','; // /// ////
-		public const char DELIMITER_SPACE = ' '; // /// ////
-		public const char DELIMITER_TAB = '\t';  // /// ////
+		public const char DELIMITER_COMMA = ','; // for .csv
+		public const char DELIMITER_SPACE = ' '; // for .ssv
+		public const char DELIMITER_TAB = '\t';  // for .tsv
 
 		private char Delimiter;
 		private StreamReader Reader;
 
 		public CsvFileReader(string file)
 			: this(file, GetFileEncoding(file))
+		{ }
+
+		public CsvFileReader(string file, char delimiter)
+			: this(file, GetFileEncoding(file), delimiter)
 		{ }
 
 		public CsvFileReader(string file, Encoding encoding)
@@ -37,11 +34,11 @@ namespace HLTStudio.Tools
 			this.Reader = new StreamReader(file, encoding);
 		}
 
-		private static Encoding GetFileEncoding(string file)
+		public static Encoding GetFileEncoding(string file)
 		{
 			using (FileStream reader = new FileStream(file, FileMode.Open, FileAccess.Read))
 			{
-				// / ///// //// ///
+				// ? UTF-8 with BOM
 				if (
 					reader.ReadByte() == 0xEF &&
 					reader.ReadByte() == 0xBB &&
@@ -137,6 +134,11 @@ namespace HLTStudio.Tools
 			return ReadToEnd(file, GetFileEncoding(file));
 		}
 
+		public static string[][] ReadToEnd(string file, char delimiter)
+		{
+			return ReadToEnd(file, GetFileEncoding(file), delimiter);
+		}
+
 		public static string[][] ReadToEnd(string file, Encoding encoding)
 		{
 			return ReadToEnd(file, encoding, DELIMITER_COMMA);
@@ -151,7 +153,3 @@ namespace HLTStudio.Tools
 		}
 	}
 }
-
-//
-// <<< Processed by SolutionConv
-//

@@ -1,11 +1,4 @@
-﻿// Processed by SolutionConv >>>
-//
-// 本ソースファイルは、公開時の所定の手続きとして一部のセンシティブな情報をマスキングしています。
-// 元データの機微に触れる可能性がある箇所を伏せ字化したものであり、
-// リリース版との処理内容に実質的な差異が生じない範囲で調整を加えています。
-//
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,15 +6,6 @@ using System.Security.Cryptography;
 
 namespace HLTStudio.Tools
 {
-	// ////////////////////////////////////////////////////////////////////////////////
-	// ///// ///////////////////////
-	// ////////////////////////////////////////////////////////////////////////////////
-	// ////////////////////////////
-	// ////////////////////////////////
-	// /////////////////////////////////
-	// //////////////////////////////////////////////////
-	// ////////////////////////////////////////////////////////////////////////////////
-
 	public class AESCipher : IDisposable
 	{
 		private AesManaged Aes;
@@ -41,7 +25,7 @@ namespace HLTStudio.Tools
 			this.Aes.KeySize = rawKey.Length * 8;
 			this.Aes.BlockSize = 128;
 			this.Aes.Mode = CipherMode.ECB;
-			this.Aes.IV = new byte[16]; // /////
+			this.Aes.IV = new byte[16]; // dummy
 			this.Aes.Key = rawKey;
 			this.Aes.Padding = PaddingMode.None;
 		}
@@ -90,7 +74,3 @@ namespace HLTStudio.Tools
 		}
 	}
 }
-
-//
-// <<< Processed by SolutionConv
-//
