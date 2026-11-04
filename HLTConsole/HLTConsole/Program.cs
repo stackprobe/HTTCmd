@@ -73,8 +73,8 @@ namespace HLTStudio
 				HTTPServer hs = new HTTPServer()
 				{
 					PortNo = 80,
-					Backlog = 100,
-					ConnectMax = 30,
+					Backlog = 300,
+					ConnectMax = 100,
 					Interlude = () => !evStop.WaitOne(0),
 					HTTPConnected = P_Connected,
 				};
@@ -370,7 +370,7 @@ namespace HLTStudio
 		{
 			for (long offset = 0L; offset < fileSize;)
 			{
-				int readSize = (int)Math.Min(fileSize - offset, (long)(512 * 1024));
+				int readSize = (int)Math.Min(fileSize - offset, (long)(64 * 1024));
 				byte[] buff = new byte[readSize];
 
 				//SockCommon.WriteLog(SockCommon.ErrorLevel_e.INFO, "READ " + offset + " " + readSize + " " + fileSize + " " + (offset * 100.0 / fileSize).ToString("F2") + " " + ((offset + readSize) * 100.0 / fileSize).ToString("F2")); // 頻出するので抑止
