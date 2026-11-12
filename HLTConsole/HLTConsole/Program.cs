@@ -357,8 +357,21 @@ namespace HLTStudio
 
 			foreach (byte chr in Encoding.UTF8.GetBytes(str))
 			{
-				buff.Append('%');
-				buff.Append(chr.ToString("x2"));
+				if (
+					('A' <= chr && chr <= 'Z') ||
+					('a' <= chr && chr <= 'z') ||
+					('0' <= chr && chr <= '9') ||
+					chr == '-' ||
+					chr == '.' ||
+					chr == '_'
+					)
+				{
+					buff.Append((char)chr);
+				}
+				else
+				{
+					buff.Append($"%{chr:x2}");
+				}
 			}
 			return buff.ToString();
 		}
